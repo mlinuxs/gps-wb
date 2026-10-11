@@ -1,0 +1,37 @@
+<view class="page">
+    <view class="panel">
+        <view class="panel-title">单体电压</view>
+        <view class="summary">
+            <view class="summary-item">
+                <view class="summary-label">最低</view>
+                <view class="summary-value summary-value-min">{{min}} mV</view>
+            </view>
+            <view class="summary-item">
+                <view class="summary-label">最高</view>
+                <view class="summary-value summary-value-max">{{max}} mV</view>
+            </view>
+            <view class="summary-item">
+                <view class="summary-label">压差</view>
+                <view class="summary-value">{{delta}} mV</view>
+            </view>
+            <view class="summary-item">
+                <view class="summary-label">平均</view>
+                <view class="summary-value">{{avg}} mV</view>
+            </view>
+        </view>
+    </view>
+    <view class="panel" wx:if="{{error}}">
+        <view class="danger">{{error}}</view>
+    </view>
+    <view class="cell" wx:for="{{cells}}" wx:key="index">
+        <view class="cell-head">
+            <text class="cell-name">NO.{{item.index}}</text>
+            <text class="cell-value {{item.isMin?'cell-value-min':''}} {{item.isMax?'cell-value-max':''}}">{{item.mv}} mV</text>
+        </view>
+        <view class="bar">
+            <view class="bar-fill {{item.isMin?'bar-fill-min':''}} {{item.isMax?'bar-fill-max':''}}" style="width:{{item.mv/maxBar*100}}%"></view>
+        </view>
+    </view>
+    <view class="panel empty" wx:if="{{!cells.length&&!error}}">暂无单体电压数据。</view>
+    <view bindtap="refresh" class="button">刷新单体</view>
+</view>

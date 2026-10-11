@@ -1,0 +1,34 @@
+﻿<view class="page detail-page theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+    <view class="detail-heading">{{title}}</view>
+    <view class="soft-card param-loading-card" wx:if="{{loadError}}">
+        <view class="param-loading-title">{{loadError}}</view>
+        <view class="param-loading-sub">请返回后重新进入</view>
+    </view>
+    <view class="soft-card param-table {{quick?'param-table-quick':''}} {{!dataReady?'param-table-loading':''}}" wx:else>
+        <view class="table-head">
+            <text>参数</text>
+            <text>设定</text>
+            <text>操作</text>
+        </view>
+        <view class="table-row" wx:if="{{quick}}">
+            <view class="param-label" style="color:#111827;">当前电池类型</view>
+            <view class="param-input-wrap">
+                <picker bindchange="onCellTypeChange" mode="selector" range="{{cellTypes}}" value="{{cellTypeIndex}}">
+                    <view class="param-picker {{dataReady?'':'param-picker-fixed'}}">{{dataReady?cellTypes[cellTypeIndex]:'读取中'}}<text class="param-picker-caret">›</text>
+                    </view>
+                </picker>
+                <text class="unit" style="color:#111827;">电芯</text>
+            </view>
+            <view bindtap="setCellType" class="set-btn {{cellTypeDirty?'set-btn-dirty':''}} {{!dataReady?'set-btn-disabled':''}}">设置</view>
+        </view>
+        <view class="table-row" wx:for="{{rows}}" wx:key="id">
+            <view class="param-label" style="color:#111827;">{{item.name}}</view>
+            <view class="param-input-wrap">
+                <input bindinput="onValueInput" class="param-input" data-id="{{item.id}}" disabled="{{!dataReady}}" placeholder="{{dataReady?'':'读取中'}}" placeholderClass="param-input-placeholder" type="{{item.inputType}}" value="{{item.value}}"></input>
+                <text class="unit" style="color:#111827;">{{item.unit}}</text>
+            </view>
+            <view bindtap="setParam" class="set-btn {{item.dirty?'set-btn-dirty':''}} {{!dataReady?'set-btn-disabled':''}}" data-id="{{item.id}}">设置</view>
+        </view>
+    </view>
+    <view class="quick-tip" wx:if="{{quick&&dataReady}}">{{quickTip}}</view>
+</view>

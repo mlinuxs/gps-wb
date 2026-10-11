@@ -1,0 +1,176 @@
+.ota-page {
+    padding-top: 34rpx
+}
+
+.ota-card {
+    margin: 0 18rpx;
+    padding: 30rpx 24rpx 40rpx
+}
+
+.ota-head {
+    -webkit-align-items: center;
+    align-items: center;
+    display: -webkit-flex;
+    display: flex;
+    gap: 18rpx;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    margin-bottom: 30rpx
+}
+
+.ota-title {
+    font-size: 34rpx
+}
+
+.ota-title,.ota-version {
+    color: var(--theme-color);
+    font-weight: 800
+}
+
+.ota-version {
+    font-size: 25rpx
+}
+
+.file-box {
+    background: #f1f5f9;
+    border: 2rpx solid var(--theme-color);
+    border-radius: 8rpx;
+    box-sizing: border-box;
+    margin: 28rpx 0;
+    min-height: 178rpx;
+    padding: 24rpx
+}
+
+.file-box-ready {
+    background: #f8fafc;
+    border-color: #cbd5e1
+}
+
+.file-box-alert {
+    border-color: var(--theme-color)
+}
+
+.file-box:active {
+    background: #f1f5f9
+}
+
+.file-action {
+    -webkit-align-items: center;
+    align-items: center;
+    background: var(--theme-color);
+    border-radius: 8rpx;
+    color: #fff;
+    display: -webkit-flex;
+    display: flex;
+    font-size: 31rpx;
+    font-weight: 800;
+    height: 68rpx;
+    -webkit-justify-content: center;
+    justify-content: center
+}
+
+.file-action-blink,.file-prompt-blink {
+    -webkit-animation: filePromptPulse .9s ease-in-out infinite;
+    animation: filePromptPulse .9s ease-in-out infinite
+}
+
+.file-prompt {
+    color: var(--theme-color);
+    font-size: 26rpx;
+    font-weight: 900;
+    margin-top: 14rpx;
+    text-align: center
+}
+
+@-webkit-keyframes filePromptPulse {
+    0%,100% {
+        opacity: 1
+    }
+
+    50% {
+        opacity: .38
+    }
+}
+
+@keyframes filePromptPulse {
+    0%,100% {
+        opacity: 1
+    }
+
+    50% {
+        opacity: .38
+    }
+}
+
+.file-rule {
+    color: var(--theme-color);
+    font-size: 24rpx;
+    font-weight: 700;
+    margin-top: 14rpx;
+    text-align: center
+}
+
+.file-info {
+    border-top: 1rpx solid #e2e8f0;
+    margin-top: 18rpx;
+    padding-top: 16rpx
+}
+
+.file-name {
+    font-size: 29rpx;
+    font-weight: 800;
+    word-break: break-all
+}
+
+.file-name,.file-size {
+    color: var(--theme-color)
+}
+
+.file-size {
+    font-size: 24rpx;
+    margin-top: 8rpx
+}
+
+.progress-wrap {
+    -webkit-align-items: center;
+    align-items: center;
+    display: grid;
+    gap: 16rpx;
+    grid-template-columns: 1fr 82rpx;
+    margin: 22rpx 0
+}
+
+.progress-track {
+    background: #e2e8f0;
+    overflow: hidden
+}
+
+.progress-bar,.progress-track {
+    border-radius: 8rpx;
+    height: 18rpx
+}
+
+.progress-bar {
+    background: var(--theme-color)
+}
+
+.progress-text {
+    font-weight: 800;
+    text-align: right
+}
+
+.ota-status,.progress-text {
+    color: var(--theme-color);
+    font-size: 26rpx
+}
+
+.ota-status {
+    font-weight: 700;
+    line-height: 36rpx;
+    min-height: 66rpx;
+    text-align: center
+}
+
+.bms-button.disabled {
+    opacity: .72
+}

@@ -1,0 +1,1 @@
+{"name":"adminListDevices","version":"1.0.0","description":"BMS web admin device list cloud function","main":"index.js","dependencies":{"wx-server-sdk":"~2.6.3"}}

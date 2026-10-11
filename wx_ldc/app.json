@@ -1,0 +1,76 @@
+{
+  "entryPagePath": "pages/dashboard/dashboard",
+  "pages": [
+    "pages/dashboard/dashboard",
+    "pages/entry/entry",
+    "pages/index/index",
+    "pages/params/params",
+    "pages/control/control",
+    "pages/mine/mine",
+    "pages/param-detail/param-detail",
+    "pages/battery-info/battery-info",
+    "pages/protection-record/protection-record",
+    "pages/ota/ota",
+    "pages/bind/bind",
+    "pages/cells/cells"
+  ],
+  "permission": {
+    "scope.bluetooth": {
+      "desc": "用于搜索并连接 BMS 蓝牙设备"
+    },
+    "scope.userLocation": {
+      "desc": "用于上报设备连接位置和部分 Android 手机扫描蓝牙设备"
+    }
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#2A2F2D",
+    "selectedColor": "#14532D",
+    "backgroundColor": "#F6F8FA",
+    "borderStyle": "white",
+    "list": [
+      {
+        "text": "实时状态",
+        "pagePath": "pages/dashboard/dashboard",
+        "iconPath": "assets/tabbar/realtime-normal.png",
+        "selectedIconPath": "assets/tabbar/realtime-active.png"
+      },
+      {
+        "text": "参数设置",
+        "pagePath": "pages/params/params",
+        "iconPath": "assets/tabbar/params-normal.png",
+        "selectedIconPath": "assets/tabbar/params-active.png"
+      },
+      {
+        "text": "BMS控制",
+        "pagePath": "pages/control/control",
+        "iconPath": "assets/tabbar/control-normal.png",
+        "selectedIconPath": "assets/tabbar/control-active.png"
+      },
+      {
+        "text": "我的",
+        "pagePath": "pages/mine/mine",
+        "iconPath": "assets/tabbar/mine-normal.png",
+        "selectedIconPath": "assets/tabbar/mine-active.png"
+      }
+    ]
+  },
+  "requiredBackgroundModes": [
+    "bluetooth-central"
+  ],
+  "style": "v2",
+  "renderer": "webview",
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "componentFramework": "exparser",
+  "window": {
+    "navigationBarTitleText": "锂安 BMS",
+    "navigationBarBackgroundColor": "#14532D",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#FFFFFF",
+    "backgroundColorTop": "#FFFFFF",
+    "backgroundColorBottom": "#F6F8FA"
+  },
+  "plugins": {}
+}

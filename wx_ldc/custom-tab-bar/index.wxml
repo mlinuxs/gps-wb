@@ -1,0 +1,7 @@
+<view class="tabbar">
+    <view bindtap="switchTab" class="tabbar-item {{item.itemClass}}" data-path="{{item.pagePath}}" style="color:{{item.color}};" wx:for="{{list}}" wx:key="pagePath">
+        <view class="tabbar-icon tabbar-gear-icon" wx:if="{{item.iconClass==='tab-icon-params'}}">⚙︎</view>
+        <view class="tabbar-icon {{item.iconClass}}" wx:else></view>
+        <view class="tabbar-text" style="color:{{item.color}};">{{item.text}}</view>
+    </view>
+</view>

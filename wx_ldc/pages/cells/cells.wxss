@@ -1,0 +1,91 @@
+.summary {
+    display: grid;
+    gap: 14rpx;
+    grid-template-columns: 1fr 1fr
+}
+
+.summary-item {
+    background: #fff;
+    border: 1rpx solid #e2e8f0;
+    border-radius: 8rpx;
+    box-shadow: 0 8rpx 24rpx rgba(23,32,42,.04);
+    padding: 18rpx
+}
+
+.summary-label {
+    color: #6b7280;
+    font-size: 23rpx;
+    margin-bottom: 8rpx
+}
+
+.summary-value {
+    color: #6b7280;
+    font-size: 31rpx;
+    font-weight: 800
+}
+
+.summary-value-min {
+    color: #7cb342
+}
+
+.summary-value-max {
+    color: #00a693
+}
+
+.cell {
+    background: #fff;
+    border: 1rpx solid #e2e8f0;
+    border-radius: 8rpx;
+    box-shadow: 0 8rpx 24rpx rgba(23,32,42,.04);
+    margin-bottom: 14rpx;
+    padding: 18rpx
+}
+
+.cell-head {
+    -webkit-align-items: center;
+    align-items: center;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    margin-bottom: 12rpx
+}
+
+.cell-name {
+    color: #6b7280;
+    font-weight: 700
+}
+
+.cell-value {
+    color: #6b7280;
+    font-weight: 800
+}
+
+.cell-value-min {
+    color: #7cb342
+}
+
+.cell-value-max {
+    color: #00a693
+}
+
+.bar {
+    background: #e2e8f0;
+    border-radius: 4rpx;
+    height: 14rpx;
+    overflow: hidden
+}
+
+.bar-fill {
+    background: var(--theme-color);
+    height: 100%;
+    min-width: 4rpx
+}
+
+.bar-fill-min {
+    background: #7cb342
+}
+
+.bar-fill-max {
+    background: #00a693
+}

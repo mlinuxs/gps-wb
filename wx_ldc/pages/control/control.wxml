@@ -1,0 +1,49 @@
+<view bindtouchcancel="cancelHiddenHold" bindtouchend="cancelHiddenHold" bindtouchmove="moveControlPageHold" bindtouchstart="startControlPageHold" class="page control-page theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+    <view class="theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+        <view class="connect-fly-layer" wx:if="{{showConnectFly}}">
+            <view class="connect-fly-icon connect-fly-search search-icon" style="{{connectFlySearchStyle}}"></view>
+            <view class="connect-fly-icon connect-fly-camera camera-icon" style="{{connectFlyCameraStyle}}"></view>
+        </view>
+        <view class="app-head global-connect-head">
+            <view catchtap="cycleTheme" class="theme-icon-button {{themeButtonStopped?'theme-icon-button-stopped':''}}"></view>
+            <view class="head-device {{connectionStatus==='重连中：'?'head-status-reconnecting':''}}">{{connectionStatus}}</view>
+            <view class="head-title">{{deviceName}}</view>
+            <view catchtap="openDeviceList" class="head-action head-action-search search-icon"></view>
+            <view catchtap="scanCode" class="head-action head-action-camera camera-icon"></view>
+        </view>
+        <view catchtap="closeThemePalette" class="theme-palette-mask" wx:if="{{showThemePalette}}"></view>
+        <view catchtouchcancel="commitThemePalette" catchtouchend="commitThemePalette" catchtouchmove="touchThemePalette" catchtouchstart="touchThemePalette" class="theme-palette" wx:if="{{showThemePalette}}">
+            <view catchtap="selectTheme" class="theme-swatch {{themeColor==item.color?'theme-swatch-active':''}}" data-color="{{item.color}}" style="background:{{item.color}};" wx:for="{{themeOptions}}" wx:key="index"></view>
+        </view>
+        <view class="disconnect-state" wx:if="{{!connected}}">
+            <view class="connect-prompt-actions">
+                <view catchtap="openDeviceList" class="connect-prompt-item">
+                    <view class="connect-prompt-action search-icon"></view>
+                    <view class="connect-prompt-label">手动连接</view>
+                </view>
+                <view catchtap="scanCode" class="connect-prompt-item">
+                    <view class="connect-prompt-action camera-icon"></view>
+                    <view class="connect-prompt-label">扫码连接</view>
+                </view>
+            </view>
+            <view class="disconnect-title">蓝牙未连接</view>
+            <view class="disconnect-sub">连接 BMS 后才能显示控制参数</view>
+        </view>
+        <view class="control-list" wx:else>
+            <view class="control-row" wx:for="{{switches}}" wx:key="key">
+                <view class="control-icon">{{item.icon}}</view>
+                <view class="control-title">{{item.title}}</view>
+                <switch bindchange="toggleSwitch" checked="{{item.checked}}" color="{{themeColor}}" data-key="{{item.key}}"></switch>
+            </view>
+            <view class="control-actions">
+                <view bindtap="sendCommand" class="control-action-btn" data-cmd="forceStart">强启</view>
+                <view bindtap="sendCommand" class="control-action-btn" data-cmd="shutdown">系统关机</view>
+                <view bindtap="sendCommand" class="control-action-btn" data-cmd="reboot">系统重启</view>
+                <view bindtap="sendCommand" class="control-action-btn" data-cmd="currentZero">电流归零</view>
+                <view bindtap="sendCommand" class="control-action-btn control-action-danger control-action-wide" data-cmd="factory" wx:if="{{showFactoryButton}}">恢复出厂</view>
+            </view>
+            <view class="last-command" wx:if="{{lastCommand}}">最近指令：{{lastCommand}}</view>
+        </view>
+        <view class="hidden-hold-area" wx:if="{{!showFactoryButton}}"></view>
+    </view>
+</view>

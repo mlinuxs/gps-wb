@@ -1,0 +1,13 @@
+<view class="page battery-info-page theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+    <view class="panel empty" wx:if="{{!connected}}">请先连接 BMS。</view>
+    <view class="soft-card info-card" wx:else>
+        <view class="loading-text" wx:if="{{loading}}">读取中...</view>
+        <view class="error-text" wx:elif="{{status}}">{{status}}</view>
+        <block wx:else>
+            <view class="info-row" wx:for="{{rows}}" wx:key="index">
+                <view class="info-name">{{item.name}}：</view>
+                <view class="info-value">{{item.value}}</view>
+            </view>
+        </block>
+    </view>
+</view>

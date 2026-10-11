@@ -1,0 +1,30 @@
+page {
+    background: #f6f8fa
+}
+
+.entry-page {
+    -webkit-align-items: center;
+    align-items: center;
+    box-sizing: border-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-justify-content: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 48rpx
+}
+
+.entry-title {
+    color: var(--theme-color);
+    font-size: 42rpx;
+    font-weight: 800;
+    margin-bottom: 16rpx
+}
+
+.entry-subtitle {
+    color: #64748b;
+    font-size: 28rpx;
+    margin-bottom: 48rpx
+}

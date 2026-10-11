@@ -1,0 +1,46 @@
+.battery-info-page {
+    padding-top: 34rpx
+}
+
+.info-card {
+    padding: 34rpx 28rpx 110rpx
+}
+
+.info-row {
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-column-gap: 10rpx;
+    column-gap: 10rpx;
+    display: grid;
+    font-size: 26rpx;
+    grid-template-columns: 210rpx 1fr;
+    min-height: 68rpx
+}
+
+.info-name {
+    color: #6b7280
+}
+
+.info-name,.info-value {
+    font-weight: 700;
+    white-space: nowrap
+}
+
+.info-value {
+    color: var(--theme-color);
+    overflow: visible
+}
+
+.error-text,.loading-text {
+    -webkit-align-items: center;
+    align-items: center;
+    color: var(--theme-color);
+    display: -webkit-flex;
+    display: flex;
+    font-size: 28rpx;
+    font-weight: 700;
+    -webkit-justify-content: center;
+    justify-content: center;
+    min-height: 180rpx;
+    text-align: center
+}

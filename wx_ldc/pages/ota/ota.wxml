@@ -1,0 +1,26 @@
+<view class="page ota-page theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+    <view class="panel empty" wx:if="{{!connected}}">请先连接 BMS。</view>
+    <view class="soft-card ota-card" wx:else>
+        <view class="ota-head">
+            <view class="ota-title">固件升级</view>
+            <view class="ota-version">当前版本：{{currentVersion}}</view>
+        </view>
+        <view bindtap="chooseFile" class="file-box {{fileBoxPromptClass}} {{hasFirmware?'file-box-ready':''}}">
+            <view class="file-action {{filePromptVisible?'file-action-blink':''}}">{{hasFirmware?'固件已选择':'请选择固件文件'}}</view>
+            <view class="file-prompt {{filePromptVisible?'file-prompt-blink':''}}" wx:if="{{filePromptVisible}}">请先选择升级固件</view>
+            <view class="file-rule">仅支持 .bin 固件文件</view>
+            <view class="file-info">
+                <view class="file-name">{{fileName}}</view>
+                <view class="file-size">{{fileSize}}</view>
+            </view>
+        </view>
+        <view class="progress-wrap">
+            <view class="progress-track">
+                <view class="progress-bar" style="width:{{progress}}%;"></view>
+            </view>
+            <view class="progress-text">{{progress}}%</view>
+        </view>
+        <view class="ota-status">{{status}}</view>
+        <view bindtap="startUpgrade" class="bms-button {{upgrading?'disabled':''}}">{{upgrading?'升级中':'开始升级'}}</view>
+    </view>
+</view>

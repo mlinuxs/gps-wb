@@ -1,0 +1,226 @@
+.detail-page {
+    background: #fff;
+    padding-top: 38rpx
+}
+
+.detail-heading {
+    color: var(--theme-color);
+    font-size: 38rpx;
+    font-weight: 800;
+    margin: 12rpx 0 54rpx;
+    text-align: center
+}
+
+.quick-buttons {
+    display: grid;
+    gap: 26rpx;
+    margin: 0 auto 34rpx;
+    width: 470rpx
+}
+
+.quick-btn {
+    font-size: 34rpx;
+    height: 86rpx
+}
+
+.param-table {
+    padding: 20rpx 28rpx 24rpx
+}
+
+.param-table-loading .param-input,.param-table-loading .param-picker {
+    color: #9ca3af
+}
+
+.param-loading-card {
+    -webkit-align-items: center;
+    align-items: center;
+    box-sizing: border-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-justify-content: center;
+    justify-content: center;
+    margin: 0 28rpx;
+    min-height: 360rpx;
+    padding: 48rpx 24rpx
+}
+
+.param-loading-title {
+    color: var(--theme-color);
+    font-size: 32rpx;
+    font-weight: 800;
+    line-height: 42rpx
+}
+
+.param-loading-sub {
+    color: #6b7280;
+    font-size: 24rpx;
+    line-height: 32rpx;
+    margin-top: 10rpx
+}
+
+.quick-tip {
+    background: #f1f5f9;
+    border-radius: 8rpx;
+    color: var(--theme-color);
+    font-size: 27rpx;
+    font-weight: 700;
+    line-height: 40rpx;
+    margin: 24rpx 28rpx 0;
+    padding: 18rpx 22rpx
+}
+
+.table-head {
+    color: var(--theme-color);
+    font-size: 30rpx;
+    font-weight: 800;
+    margin-bottom: 18rpx;
+    padding-bottom: 16rpx;
+    text-align: center
+}
+
+.table-head,.table-row {
+    -webkit-align-items: center;
+    align-items: center;
+    border-bottom: 1rpx solid #e2e8f0;
+    display: grid;
+    grid-template-columns: 1fr 1.55fr 1.1fr
+}
+
+.table-row {
+    min-height: 98rpx
+}
+
+.table-row:last-child {
+    border-bottom: 0
+}
+
+.param-label {
+    font-size: 28rpx;
+    line-height: 40rpx;
+    white-space: pre-line
+}
+
+.detail-page .param-input,.detail-page .param-label,.detail-page .param-picker,.detail-page .param-picker wx-text,.detail-page .unit,.param-label {
+    color: var(--theme-color)
+}
+
+.detail-page .param-label,.detail-page .unit {
+    color: #111827
+}
+
+.param-input-wrap {
+    -webkit-align-items: center;
+    align-items: center;
+    display: -webkit-flex;
+    display: flex;
+    gap: 22rpx;
+    -webkit-justify-content: flex-start;
+    justify-content: flex-start
+}
+
+.param-table-quick .table-head wx-text:nth-child(2) {
+    text-align: center
+}
+
+.param-table-quick .param-input-wrap {
+    -webkit-justify-content: center;
+    justify-content: center
+}
+
+.param-input {
+    font-size: 34rpx;
+    text-align: center
+}
+
+.param-input,.param-picker {
+    background: #fff;
+    border: 2rpx solid #cbd5e1;
+    border-radius: 6rpx;
+    box-sizing: border-box;
+    color: var(--theme-color);
+    font-weight: 700;
+    height: 56rpx;
+    width: 210rpx
+}
+
+.param-picker {
+    -webkit-align-items: center;
+    align-items: center;
+    display: -webkit-flex;
+    display: flex;
+    font-size: 30rpx;
+    gap: 10rpx;
+    -webkit-justify-content: center;
+    justify-content: center
+}
+
+.param-picker-caret {
+    color: var(--theme-color);
+    font-size: 46rpx;
+    line-height: 46rpx
+}
+
+.detail-page .param-picker-fixed,.detail-page .param-picker-fixed .param-picker-caret,.detail-page .param-picker-fixed wx-text,.param-input-placeholder {
+    color: #9ca3af
+}
+
+.unit {
+    color: var(--theme-color);
+    font-size: 30rpx;
+    min-width: 56rpx
+}
+
+.set-btn {
+    -webkit-align-items: center;
+    align-items: center;
+    background: var(--theme-color);
+    border: 0;
+    border-radius: 8rpx;
+    box-shadow: none;
+    color: #fff;
+    display: -webkit-flex;
+    display: flex;
+    font-size: 28rpx;
+    font-weight: 800;
+    height: 64rpx;
+    -webkit-justify-content: center;
+    justify-content: center;
+    justify-self: end;
+    width: 200rpx
+}
+
+.set-btn-dirty {
+    -webkit-animation: setBtnDirtyBlink .9s ease-in-out infinite;
+    animation: setBtnDirtyBlink .9s ease-in-out infinite
+}
+
+.set-btn-disabled {
+    background: #cbd5e1;
+    color: #fff
+}
+
+@-webkit-keyframes setBtnDirtyBlink {
+    0%,100% {
+        background: var(--theme-color);
+        box-shadow: 0 0 0 0 hsla(220,9%,46%,.22)
+    }
+
+    50% {
+        background: #f59e0b;
+        box-shadow: 0 0 0 10rpx rgba(245,158,11,.18)
+    }
+}
+
+@keyframes setBtnDirtyBlink {
+    0%,100% {
+        background: var(--theme-color);
+        box-shadow: 0 0 0 0 hsla(220,9%,46%,.22)
+    }
+
+    50% {
+        background: #f59e0b;
+        box-shadow: 0 0 0 10rpx rgba(245,158,11,.18)
+    }
+}

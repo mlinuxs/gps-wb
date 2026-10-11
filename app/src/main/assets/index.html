@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>骑行导航</title>
+<style>
+  /* 手表小屏适配（OPPO Watch 3 Pro：378x496 物理 / 约 189x248 CSS 视口）。
+     策略：以 190px 宽为设计基准，JS 按实际视口宽度整体等比缩放，
+     高度按实际比例拉伸，保证任何屏幕下都不重叠、不裁切。 */
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0f1420; color:#e8ecf4;
+    font-family:"Helvetica Neue",Arial,sans-serif; font-size:11px; }
+
+  /* 缩放容器：左上角为原点，按比例放大到铺满屏幕 */
+  #fit { position:absolute; left:0; top:0; -webkit-transform-origin:0 0; transform-origin:0 0; }
+  #app { width:190px; display:-webkit-flex; display:flex; -webkit-flex-direction:column;
+    flex-direction:column; padding:4px 5px; position:relative; overflow:hidden;
+    border-radius:0; }
+
+  /* 顶部状态行 */
+  .topbar { display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center;
+    -webkit-justify-content:space-between; justify-content:space-between; padding:0 1px 2px; }
+  .statline { display:-webkit-flex; display:flex; -webkit-flex:0 0 auto; flex:0 0 auto; }
+  .statline .st { font-size:8px; color:#9aa5b8; margin-left:4px; white-space:nowrap; }
+  .statline .st:first-child { margin-left:0; }
+  .statline .st.ok { color:#4ade80; }
+  .statline .st.warn { color:#fbbf24; }
+  .statline .st.err { color:#f87171; }
+  .rec-box { display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center;
+    font-size:8px; color:#9aa5b8; -webkit-flex:0 1 auto; flex:0 1 auto; min-width:0; overflow:hidden; }
+  .rec-dot { width:6px; height:6px; border-radius:50%; background:#4a5568; margin-right:3px; }
+  .rec-dot.on { background:#ff4d4f; -webkit-animation:blink 1s infinite; animation:blink 1s infinite; }
+  @-webkit-keyframes blink { 50% { opacity:.25; } }
+  @keyframes blink { 50% { opacity:.25; } }
+
+  /* 顶部主视觉：左速度 + 右电量（无文字标签，数值最大化） */
+  .hero { display:-webkit-flex; display:flex; padding:2px 0 4px; }
+  .hero-item { text-align:center; min-width:0; }
+  .hero-item.speed { -webkit-flex:1.15; flex:1.15; }
+  .hero-item.soc { -webkit-flex:1; flex:1; }
+  .hero-item .val { font-size:44px; font-weight:800; line-height:1.0; }
+  .hero-item .unit { font-size:11px; color:#9aa5b8; margin-top:1px; }
+  .hero-item.speed .val { color:#60a5fa; }
+  .hero-item.soc .val { color:#4ade80; }
+  /* 速度与电量之间的竖线分隔 */
+  .vsep { width:1px; height:34px; margin:0 3px; background:#25406e;
+    -webkit-align-self:center; align-self:center; -webkit-flex:0 0 auto; flex:0 0 auto; }
+
+  /* 左右分栏：左骑行数据 / 右电池数据 */
+  .dual { display:-webkit-flex; display:flex; -webkit-flex:1 1 auto; flex:1 1 auto;
+    margin:0 -2px; min-height:0; }
+  .col { -webkit-flex:1; flex:1; display:-webkit-flex; display:flex;
+    -webkit-flex-direction:column; flex-direction:column; margin:0 2px; min-height:0; }
+  .gitem { -webkit-flex:1; flex:1; background:#16233f; border:1px solid #25406e;
+    border-radius:6px; padding:2px 3px; text-align:center; overflow:hidden;
+    display:-webkit-flex; display:flex; -webkit-flex-direction:column; flex-direction:column;
+    -webkit-justify-content:center; justify-content:center; margin-bottom:3px; }
+  .gitem:last-child { margin-bottom:0; }
+  .gitem .lab { font-size:9px; color:#9aa5b8; line-height:1.2; }
+  .gitem .val { font-size:17px; font-weight:700; color:#cdd7ea; line-height:1.15; }
+  .gitem .unit { font-size:9px; color:#9aa5b8; font-weight:400; margin-left:1px; }
+  .gitem.avg .val { color:#fbbf24; }
+  .gitem.dist .val { color:#4ade80; }
+
+  /* 底部按钮：两行三列 */
+  .btns { display:-webkit-flex; display:flex; -webkit-flex-direction:column; flex-direction:column;
+    margin:3px -2px 0 -2px; }
+  .brow { display:-webkit-flex; display:flex; }
+  .brow + .brow { margin-top:3px; }
+  button { -webkit-flex:1; flex:1; margin:0 2px; border:none; border-radius:6px; padding:5px 0;
+    font-size:10px; font-weight:600; color:#fff; background:#2b3a55; white-space:nowrap; }
+  button:active { opacity:.8; }
+  button.primary { background:#2563eb; }
+  button.danger { background:#b91c1c; }
+  button.ghost { background:#374151; }
+  button.on { background:#0e7a4d; }
+  button.warn { background:#92600a; }
+
+  /* 消息条 */
+  .toast { position:absolute; left:50%; bottom:12px; -webkit-transform:translateX(-50%); transform:translateX(-50%);
+    background:rgba(0,0,0,.88); color:#fff; padding:4px 8px; border-radius:6px; font-size:10px;
+    max-width:90%; text-align:center; opacity:0; pointer-events:none; -webkit-transition:opacity .3s;
+    transition:opacity .3s; z-index:30; }
+  .toast.show { opacity:1; }
+
+  /* 弹窗 */
+  .mask { position:absolute; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,.6); z-index:20; display:none; }
+  .mask.show { display:block; }
+  .modal { position:absolute; left:50%; top:50%; -webkit-transform:translate(-50%,-50%);
+    transform:translate(-50%,-50%); width:94%; background:#1b2334; border:1px solid #2a344a;
+    border-radius:8px; padding:8px; z-index:21; display:none; }
+  .modal.show { display:block; }
+  .modal h3 { font-size:11px; margin-bottom:6px; }
+  .modal input { width:100%; padding:5px; border-radius:5px; border:1px solid #3a4660;
+    background:#0f1420; color:#e8ecf4; font-size:10px; margin-bottom:5px; }
+  .modal .row { display:-webkit-flex; display:flex; margin:0 -2px; }
+  .modal .row button { font-size:10px; padding:6px 0; }
+
+  /* 蓝牙设备列表 */
+  .devlist { max-height:110px; overflow-y:auto; border:1px solid #2a344a; border-radius:5px; margin-bottom:5px; }
+  .dev { padding:5px 6px; border-bottom:1px solid #242e44; }
+  .dev:last-child { border-bottom:none; }
+  .dev:active { background:#243049; }
+  .dev .n { font-weight:600; font-size:11px; }
+  .dev .m { color:#9aa5b8; font-size:9px; margin-top:1px; display:-webkit-flex; display:flex;
+    -webkit-justify-content:space-between; justify-content:space-between; }
+  .dev-empty { padding:8px; text-align:center; color:#7c8aa0; font-size:10px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div id="fit">
+<div id="app">
+
+  <div class="topbar">
+    <div class="statline">
+      <span class="st" id="stBle">蓝牙 --</span>
+      <span class="st" id="stGps">GPS --</span>
+      <span class="st" id="stBat">手表 --%</span>
+    </div>
+    <div class="rec-box"><span class="rec-dot" id="recDot"></span><span id="recText">未记录</span></div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-item speed">
+      <div class="val"><span id="speed">--</span></div>
+      <div class="unit">km/h</div>
+    </div>
+    <div class="vsep"></div>
+    <div class="hero-item soc">
+      <div class="val"><span id="soc">--</span></div>
+      <div class="unit">%</div>
+    </div>
+  </div>
+
+  <div class="dual">
+    <div class="col">
+      <div class="gitem dist"><div class="lab">里程</div><div class="val"><span id="distance">0.000</span><span class="unit">km</span></div></div>
+      <div class="gitem avg"><div class="lab">平均速度</div><div class="val"><span id="avgSpeed">--</span><span class="unit">km/h</span></div></div>
+      <div class="gitem"><div class="lab">已骑时长</div><div class="val"><span id="elapsed">00:00:00</span></div></div>
+    </div>
+    <div class="col">
+      <div class="gitem"><div class="lab">电压</div><div class="val"><span id="voltage">--</span><span class="unit">V</span></div></div>
+      <div class="gitem"><div class="lab">电流</div><div class="val"><span id="current">--</span><span class="unit">A</span></div></div>
+      <div class="gitem"><div class="lab">压差</div><div class="val"><span id="cellDiff">--</span><span class="unit">V</span></div></div>
+    </div>
+  </div>
+
+  <div class="btns">
+    <div class="brow">
+      <button class="danger" id="btnStopStart">开始</button>
+      <button class="ghost" id="btnPause">暂停</button>
+      <button class="ghost" id="btnBle">蓝牙</button>
+    </div>
+    <div class="brow">
+      <button class="ghost" id="btnMap">百度地图</button>
+      <button class="ghost" id="btnRotate">轮换</button>
+      <button class="ghost" id="btnKeep">常亮</button>
+    </div>
+  </div>
+
+  <!-- 蓝牙设备选择弹窗 -->
+  <div class="mask" id="bleMask"></div>
+  <div class="modal" id="bleModal">
+    <h3>连接电池保护板</h3>
+    <div class="devlist" id="devList"><div class="dev-empty">正在搜索低功耗BLE设备…</div></div>
+    <input type="text" id="macInput" placeholder="或手动输入 MAC，如 00:11:22:33:44:55" maxlength="17">
+    <div class="row">
+      <button class="ghost" id="btnScan">重扫</button>
+      <button class="primary" id="btnConnect">连接</button>
+      <button class="danger" id="btnDisconnect">断开</button>
+      <button class="ghost" id="btnClose">关闭</button>
+    </div>
+  </div>
+
+  <!-- 地图应用选择弹窗 -->
+  <div class="mask" id="mapMask"></div>
+  <div class="modal" id="mapModal">
+    <h3>选择地图应用</h3>
+    <div class="devlist" id="mapList"><div class="dev-empty">正在读取已安装应用…</div></div>
+    <input type="text" id="mapPkgInput" placeholder="或手动输入包名，如 com.baidu.BaiduMap">
+    <div class="row">
+      <button class="primary" id="btnMapOk">确定</button>
+      <button class="ghost" id="btnMapClose">关闭</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+</div>
+</div>
+
+<script>
+/* 严格 ES5 */
+
+/* ---------------- 整体等比缩放：适配任意手表屏幕 ---------------- */
+var DESIGN_W = 190;
+function fitScreen() {
+  var vw = window.innerWidth || DESIGN_W;
+  var vh = window.innerHeight || 248;
+  var k = vw / DESIGN_W;
+  if (!(k > 0) || !isFinite(k)) { k = 1; }
+  var app = document.getElementById('app');
+  var fit = document.getElementById('fit');
+  if (!app || !fit) { return; }
+  /* 高度按实际比例拉伸，缩放后正好铺满屏幕，无留白无裁切 */
+  app.style.height = (vh / k) + 'px';
+  fit.style.webkitTransform = 'scale(' + k + ')';
+  fit.style.transform = 'scale(' + k + ')';
+}
+
+var devices = {};
+var keepOn = false;
+var rotateOn = false;
+var toastTimer = null;
+var lastData = null;
+
+function $(id) { return document.getElementById(id); }
+function bridge() { return window.AndroidBridge || null; }
+
+function showToast(msg) {
+  var t = $('toast');
+  if (!t) { return; }
+  t.innerHTML = msg;
+  t.className = 'toast show';
+  if (toastTimer) { clearTimeout(toastTimer); }
+  toastTimer = setTimeout(function () { t.className = 'toast'; }, 3000);
+}
+
+window.onerror = function (msg, src, line) {
+  try { showToast('脚本错误: ' + msg + (line ? ' @' + line : '')); } catch (e) { }
+  return false;
+};
+
+function fmt(v, d) {
+  if (v === null || v === undefined || isNaN(v)) { return '--'; }
+  return Number(v).toFixed(d);
+}
+
+function fmtElapsed(sec) {
+  sec = Math.max(0, sec || 0);
+  var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  function two(x) { return (x < 10 ? '0' : '') + x; }
+  return two(h) + ':' + two(m) + ':' + two(s);
+}
+
+var BLE_TEXT = {
+  off:['未开启','err'], scanning:['搜索中','warn'], connecting:['连接中','warn'],
+  connected:['已连接','ok'], disconnected:['未连接','']
+};
+var GPS_TEXT = { no_fix:['无信号','err'], weak:['信号弱','warn'], ok:['已定位','ok'] };
+
+function setStateLine(bleState, gpsStatus) {
+  var bi = BLE_TEXT[bleState] || ['未知',''];
+  var gi = GPS_TEXT[gpsStatus] || GPS_TEXT.no_fix;
+  var be = $('stBle'); if (be) { be.innerHTML = '蓝牙 ' + bi[0]; be.className = 'st' + (bi[1] ? ' ' + bi[1] : ''); }
+  var ge = $('stGps'); if (ge) { ge.innerHTML = 'GPS ' + gi[0]; ge.className = 'st' + (gi[1] ? ' ' + gi[1] : ''); }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ---------------- Java -> H5 回调 ---------------- */
+
+function onDataUpdate(jsonStr) {
+  var d;
+  try { d = JSON.parse(jsonStr); } catch (e) { return; }
+  lastData = d;
+
+  $('recDot').className = 'rec-dot' + (d.recording ? ' on' : '');
+  var st = '未记录';
+  if (d.recording) { st = d.paused ? '已暂停' : (d.stopped ? '停车' : '记录中'); }
+  $('recText').innerHTML = st;
+
+  $('voltage').innerHTML = fmt(d.voltage, 2);
+  $('current').innerHTML = fmt(d.current, 2);
+  $('soc').innerHTML = (d.soc === null || d.soc === undefined) ? '--' : Math.round(d.soc);
+  $('cellDiff').innerHTML = (d.cellDiff === null || d.cellDiff === undefined) ? '--' : fmt(d.cellDiff, 3);
+  $('speed').innerHTML = d.paused ? '0.0' : fmt(d.speed, 1);
+  $('distance').innerHTML = fmt(d.distance, 3);
+  $('elapsed').innerHTML = fmtElapsed(d.elapsed);
+
+  /* 平均速度 = 里程 / 已骑时长(小时) */
+  var avg = '--';
+  if (d.elapsed && d.elapsed > 0 && d.distance != null && !isNaN(d.distance)) {
+    avg = (d.distance / (d.elapsed / 3600)).toFixed(1);
+  }
+  $('avgSpeed').innerHTML = avg;
+
+  setStateLine(d.bleState, d.gpsStatus);
+  updateButtons(d);
+}
+
+function onStatusUpdate(jsonStr) {
+  var d;
+  try { d = JSON.parse(jsonStr); } catch (e) { return; }
+  setStateLine(d.bleState, d.gpsStatus);
+  if (d.message) { showToast(d.message); }
+}
+
+/* Java 推送手表自身电量 */
+function onWatchBattery(jsonStr) {
+  var el = $('stBat');
+  if (!el) { return; }
+  var d;
+  try { d = JSON.parse(jsonStr); } catch (e) { return; }
+  if (d && d.level !== null && d.level !== undefined && !isNaN(d.level)) {
+    el.innerHTML = '手表 ' + Math.round(d.level) + '%';
+  }
+}
+
+function onBleDevices(jsonStr) {
+  var d;
+  try { d = JSON.parse(jsonStr); } catch (e) { return; }
+  var list = d.devices || [];
+  for (var i = 0; i < list.length; i++) { devices[list[i].mac] = list[i]; }
+  renderDevList();
+}
+
+/* ---------------- 按钮状态 ---------------- */
+function updateButtons(d) {
+  var bp = $('btnPause'), bs = $('btnStopStart');
+  if (d.recording) {
+    bp.className = d.paused ? 'primary' : 'warn';
+    bp.innerHTML = d.paused ? '继续' : '暂停';
+    bs.className = 'danger';
+    bs.innerHTML = '停止';
+  } else {
+    bp.className = 'ghost';
+    bp.innerHTML = '暂停';
+    bs.className = 'primary';
+    bs.innerHTML = '开始';
+  }
+}
+
+/* ---------------- 蓝牙弹窗 ---------------- */
+function openBleModal() {
+  $('bleMask').className = 'mask show';
+  $('bleModal').className = 'modal show';
+  devices = {};
+  renderDevList();
+  if (bridge()) { bridge().startBleScan(); }
+}
+function closeBleModal() {
+  $('bleMask').className = 'mask';
+  $('bleModal').className = 'modal';
+  if (bridge() && bridge().stopBleScan) { bridge().stopBleScan(); }
+}
+function renderDevList() {
+  var box = $('devList');
+  var keys = [];
+  for (var k in devices) { if (devices.hasOwnProperty(k)) { keys.push(k); } }
+  if (keys.length === 0) { box.innerHTML = '<div class="dev-empty">正在搜索低功耗BLE设备…</div>'; return; }
+  keys.sort(function (a, b) { return (devices[b].rssi || -999) - (devices[a].rssi || -999); });
+  var html = '';
+  for (var i = 0; i < keys.length; i++) {
+    var dev = devices[keys[i]];
+    html += '<div class="dev" data-mac="' + dev.mac + '">'
+      + '<div class="n">' + escapeHtml(dev.name) + '</div>'
+      + '<div class="m"><span>' + dev.mac + '</span><span>' + (dev.rssi || 0) + ' dBm</span></div>'
+      + '</div>';
+  }
+  box.innerHTML = html;
+  var items = box.getElementsByTagName('div');
+  for (var j = 0; j < items.length; j++) {
+    if (items[j].className === 'dev') {
+      items[j].onclick = function () { connect(this.getAttribute('data-mac')); };
+    }
+  }
+}
+function connect(mac) {
+  if (!mac) { mac = $('macInput').value; }
+  mac = String(mac).replace(/^\s+|\s+$/g, '').toUpperCase();
+  if (!/^[0-9A-F]{2}(:[0-9A-F]{2}){5}$/.test(mac)) { showToast('MAC 格式不正确'); return; }
+  if (bridge()) { bridge().connectBle(mac); showToast('正在连接 ' + mac + ' …'); closeBleModal(); }
+}
+
+/* ---------------- 地图应用选择 ---------------- */
+function openMapPicker() {
+  $('mapMask').className = 'mask show';
+  $('mapModal').className = 'modal show';
+  renderMapList(null, true);
+  if (bridge() && bridge().requestMapCandidates) { bridge().requestMapCandidates(); }
+}
+function closeMapPicker() {
+  $('mapMask').className = 'mask';
+  $('mapModal').className = 'modal';
+}
+function renderMapList(list, loading) {
+  var box = $('mapList');
+  if (!box) { return; }
+  if (!list || list.length === 0) {
+    box.innerHTML = '<div class="dev-empty">'
+      + (loading ? '正在读取已安装应用…' : '未找到疑似地图/导航应用，可在下方手动输入包名')
+      + '</div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < list.length; i++) {
+    var it = list[i];
+    html += '<div class="dev" data-pkg="' + escapeHtml(it.pkg) + '">'
+      + '<div class="n">' + escapeHtml(it.label || it.pkg) + '</div>'
+      + '<div class="m"><span>' + escapeHtml(it.pkg) + '</span></div>'
+      + '</div>';
+  }
+  box.innerHTML = html;
+  var items = box.getElementsByTagName('div');
+  for (var j = 0; j < items.length; j++) {
+    if (items[j].className === 'dev') {
+      items[j].onclick = function () { chooseMapPkg(this.getAttribute('data-pkg')); };
+    }
+  }
+}
+function chooseMapPkg(pkg) {
+  if (!pkg) { return; }
+  closeMapPicker();
+  if (bridge() && bridge().setMapPackage) { bridge().setMapPackage(pkg); }
+}
+/* Java 回传疑似地图应用列表 */
+function onMapCandidates(jsonStr) {
+  var d;
+  try { d = JSON.parse(jsonStr); } catch (e) { return; }
+  renderMapList(d ? d.apps : [], false);
+}
+
+/* ---------------- 按钮事件 ---------------- */
+$('btnStopStart').onclick = function () {
+  if (!bridge()) { return; }
+  if (lastData && lastData.recording) { bridge().stopRecord(); showToast('已停止，CSV 已保存'); }
+  else { bridge().startRecord(); showToast('开始记录…'); }
+};
+$('btnPause').onclick = function () {
+  if (!bridge()) { return; }
+  if (lastData && lastData.recording && lastData.paused) { bridge().resumeRecord(); }
+  else if (lastData && lastData.recording) { bridge().pauseRecord(); }
+  else { showToast('当前未在记录'); }
+};
+$('btnBle').onclick = openBleModal;
+/* 地图：单击打开；长按手动选择地图应用 */
+var mapPressTimer = null, mapLongPressed = false;
+(function () {
+  var el = $('btnMap');
+  el.addEventListener('touchstart', function () {
+    mapLongPressed = false;
+    if (mapPressTimer) { clearTimeout(mapPressTimer); }
+    mapPressTimer = setTimeout(function () {
+      mapPressTimer = null;
+      mapLongPressed = true;
+      openMapPicker();
+    }, 700);
+  });
+  el.addEventListener('touchend', function () {
+    if (mapPressTimer) { clearTimeout(mapPressTimer); mapPressTimer = null; }
+  });
+  el.addEventListener('touchmove', function () {
+    if (mapPressTimer) { clearTimeout(mapPressTimer); mapPressTimer = null; }
+  });
+  el.onclick = function () {
+    if (mapLongPressed) { mapLongPressed = false; return; }
+    if (!bridge()) { return; }
+    bridge().openBaiduMap();
+    showToast('正在打开地图…');
+  };
+})();
+$('btnRotate').onclick = function () {
+  if (!bridge()) { return; }
+  rotateOn = !rotateOn;
+  bridge().setRotateMode(rotateOn);
+  this.className = rotateOn ? 'on' : 'ghost';
+  showToast(rotateOn ? '轮换已开启（每10秒切百度地图）' : '轮换已关闭');
+};
+$('btnKeep').onclick = function () {
+  keepOn = !keepOn;
+  this.className = keepOn ? 'on' : 'ghost';
+  if (bridge()) { bridge().setScreenKeepOn(keepOn); }
+  showToast(keepOn ? '屏幕常亮已开启' : '屏幕常亮已关闭');
+};
+
+/* 蓝牙弹窗 */
+$('bleMask').onclick = closeBleModal;
+$('btnClose').onclick = closeBleModal;
+$('btnScan').onclick = function () { devices = {}; renderDevList(); if (bridge()) bridge().startBleScan(); };
+$('btnConnect').onclick = function () { connect(null); };
+$('btnDisconnect').onclick = function () { if (bridge()) bridge().disconnectBle(); closeBleModal(); };
+
+/* 地图选择弹窗 */
+$('mapMask').onclick = closeMapPicker;
+$('btnMapClose').onclick = closeMapPicker;
+$('btnMapOk').onclick = function () {
+  var v = $('mapPkgInput').value.replace(/^\s+|\s+$/g, '');
+  if (!v) { showToast('请输入包名'); return; }
+  chooseMapPkg(v);
+};
+
+/* ---------------- 初始化 ---------------- */
+fitScreen();
+window.addEventListener('resize', fitScreen);
+window.addEventListener('orientationchange', function () { setTimeout(fitScreen, 200); });
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<view class="page mine-page theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+    <view class="theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+        <view class="connect-fly-layer" wx:if="{{showConnectFly}}">
+            <view class="connect-fly-icon connect-fly-search search-icon" style="{{connectFlySearchStyle}}"></view>
+            <view class="connect-fly-icon connect-fly-camera camera-icon" style="{{connectFlyCameraStyle}}"></view>
+        </view>
+        <view class="app-head global-connect-head">
+            <view catchtap="cycleTheme" class="theme-icon-button {{themeButtonStopped?'theme-icon-button-stopped':''}}"></view>
+            <view class="head-device {{connectionStatus==='重连中：'?'head-status-reconnecting':''}}">{{connectionStatus}}</view>
+            <view class="head-title">{{deviceName}}</view>
+            <view catchtap="openDeviceList" class="head-action head-action-search search-icon"></view>
+            <view catchtap="scanCode" class="head-action head-action-camera camera-icon"></view>
+        </view>
+        <view catchtap="closeThemePalette" class="theme-palette-mask" wx:if="{{showThemePalette}}"></view>
+        <view catchtouchcancel="commitThemePalette" catchtouchend="commitThemePalette" catchtouchmove="touchThemePalette" catchtouchstart="touchThemePalette" class="theme-palette" wx:if="{{showThemePalette}}">
+            <view catchtap="selectTheme" class="theme-swatch {{themeColor==item.color?'theme-swatch-active':''}}" data-color="{{item.color}}" style="background:{{item.color}};" wx:for="{{themeOptions}}" wx:key="index"></view>
+        </view>
+        <view wx:if="{{!connected}}">
+            <view class="disconnect-state">
+                <view class="connect-prompt-actions">
+                    <view catchtap="openDeviceList" class="connect-prompt-item">
+                        <view class="connect-prompt-action search-icon"></view>
+                        <view class="connect-prompt-label">手动连接</view>
+                    </view>
+                    <view catchtap="scanCode" class="connect-prompt-item">
+                        <view class="connect-prompt-action camera-icon"></view>
+                        <view class="connect-prompt-label">扫码连接</view>
+                    </view>
+                </view>
+                <view class="disconnect-title">蓝牙未连接</view>
+                <view class="disconnect-sub">连接 BMS 后才能显示我的设备信息</view>
+            </view>
+        </view>
+        <view class="mine-connected" wx:else>
+            <view class="soft-card mine-menu">
+                <view bindtap="batteryInfo" class="mine-row">
+                    <view class="mine-icon">B</view>
+                    <view class="mine-title">电池信息</view>
+                    <view class="mine-arrow">›</view>
+                </view>
+                <view bindtap="protectionRecord" class="mine-row">
+                    <view class="mine-icon">!</view>
+                    <view class="mine-title">保护记录</view>
+                    <view class="mine-arrow">›</view>
+                </view>
+                <view bindtap="ota" class="mine-row">
+                    <view class="mine-icon">U</view>
+                    <view class="mine-title">固件升级</view>
+                    <view class="mine-arrow">›</view>
+                </view>
+                <view bindtap="changePassword" class="mine-row">
+                    <view class="mine-icon">P</view>
+                    <view class="mine-title">修改密码</view>
+                    <view class="mine-arrow">›</view>
+                </view>
+            </view>
+            <view class="dialog-mask" wx:if="{{showPassword}}"></view>
+            <view class="password-dialog" wx:if="{{showPassword}}">
+                <view class="dialog-title">修改密码</view>
+                <view class="pwd-row">
+                    <text>原密码</text>
+                    <input password bindinput="setOld" maxlength="4" placeholder="请输入当前密码"></input>
+                </view>
+                <view class="pwd-row">
+                    <text>新密码</text>
+                    <input password bindinput="setNew" maxlength="4" placeholder="4 位数字密码" type="number"></input>
+                </view>
+                <view class="pwd-row">
+                    <text>确认密码</text>
+                    <input password bindinput="setConfirm" maxlength="4" placeholder="4 位数字密码" type="number"></input>
+                </view>
+                <view class="dialog-actions">
+                    <view bindtap="closePassword" class="{{changingPassword?'disabled':''}}">取消</view>
+                    <view bindtap="confirmPassword" class="{{changingPassword?'disabled':''}}">{{changingPassword?'修改中':'确定'}}</view>
+                </view>
+            </view>
+        </view>
+        <view bindtap="closeDeviceList" class="sheet-mask" wx:if="{{showDevices}}"></view>
+        <view class="device-sheet" wx:if="{{showDevices}}">
+            <view bindtap="closeDeviceList" class="sheet-close">×</view>
+            <view class="sheet-filter">
+                <text class="sheet-filter-label">过滤</text>
+                <switch bindchange="toggleBmsOnly" checked="{{bmsOnly}}" class="sheet-filter-switch" color="{{themeColor}}"></switch>
+            </view>
+            <view class="sheet-title">设备列表</view>
+            <view class="sheet-subtitle">Device List</view>
+            <view class="search-status">{{scanning?'搜索设备中':'搜索完成'}}({{filteredDevices.length}})</view>
+            <scroll-view class="sheet-device-list" enhanced="true" scrollY="true" showScrollbar="true">
+                <view bindtap="connectDevice" class="sheet-device" data-device="{{item}}" wx:for="{{filteredDevices}}" wx:key="deviceId">
+                    <view class="bt-icon ble-list-icon"></view>
+                    <view class="sheet-device-main">
+                        <view class="sheet-name">{{item.name}}</view>
+                    </view>
+                    <view class="sheet-rssi">{{item.dbm}}</view>
+                </view>
+            </scroll-view>
+        </view>
+    </view>
+</view>

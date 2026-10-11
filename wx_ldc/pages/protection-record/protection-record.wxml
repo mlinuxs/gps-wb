@@ -1,0 +1,18 @@
+<view class="page protection-record-page theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+    <view class="panel empty" wx:if="{{!connected}}">请先连接 BMS。</view>
+    <view class="soft-card record-card" wx:else>
+        <view class="section-title">保护记录</view>
+        <view class="status-text" wx:if="{{loading||status}}">{{status||'读取中...'}}</view>
+        <view class="record-table" wx:if="{{hasRecords}}">
+            <view class="table-head">
+                <view>保护时间</view>
+                <view>保护类型</view>
+            </view>
+            <view class="table-row" wx:for="{{records}}" wx:key="index">
+                <view>{{item.time}}</view>
+                <view>{{item.event}}</view>
+            </view>
+        </view>
+        <view class="empty-text" wx:elif="{{!loading}}">暂无保护记录</view>
+    </view>
+</view>

@@ -1,0 +1,36 @@
+<view class="page">
+    <view class="panel mode-panel">
+        <view class="mode-title">{{mockMode?'电脑预览模式':'真机蓝牙模式'}}</view>
+        <view class="mode-desc">{{status}}</view>
+    </view>
+    <view class="panel" wx:if="{{connected}}">
+        <view class="panel-title">已绑定设备</view>
+        <view class="row">
+            <text class="row-label">名称</text>
+            <text class="row-value">{{deviceName}}</text>
+        </view>
+        <view bindtap="disconnect" class="button secondary">断开绑定</view>
+    </view>
+    <view class="panel">
+        <view class="panel-title">绑定 BMS</view>
+        <view class="scan-actions">
+            <view bindtap="scanAll" class="button">{{scanning&&!onlyBms?'扫描中':'全部蓝牙'}}</view>
+            <view bindtap="scanBms" class="button secondary">{{scanning&&onlyBms?'扫描中':'BMS 优先'}}</view>
+        </view>
+        <view bindtap="stopScan" class="button warning stop-button" wx:if="{{scanning}}">停止扫描</view>
+    </view>
+    <view class="device-list" wx:if="{{devices.length}}">
+        <view bindtap="bindDevice" class="device" data-device="{{item}}" wx:for="{{devices}}" wx:key="deviceId">
+            <view class="device-head">
+                <view class="device-name">{{item.name}}</view>
+                <view class="pill" wx:if="{{item.isBms}}">BMS</view>
+                <view class="pill danger" wx:if="{{!item.connectable}}">不可连接</view>
+            </view>
+            <view class="device-meta">RSSI: {{item.RSSI}}</view>
+            <view class="device-meta" wx:if="{{item.localName&&item.localName!==item.name}}">Local: {{item.localName}}</view>
+            <view class="device-meta">{{item.deviceId}}</view>
+            <view class="device-meta" wx:if="{{item.services}}">Services: {{item.services}}</view>
+        </view>
+    </view>
+    <view class="panel empty" wx:else>点击“全部蓝牙”或“BMS 优先”都会扫描全部可发现设备。部分 BMS 不广播服务 UUID，会先显示为普通蓝牙设备。</view>
+</view>

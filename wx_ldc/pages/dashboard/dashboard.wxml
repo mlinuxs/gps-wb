@@ -1,0 +1,276 @@
+<view class="page realtime-page theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+    <view class="theme-root theme-{{themeIndex}}" style="{{themeStyle}}">
+        <view class="connect-fly-layer" wx:if="{{showConnectFly}}">
+            <view class="connect-fly-icon connect-fly-search search-icon" style="{{connectFlySearchStyle}}"></view>
+            <view class="connect-fly-icon connect-fly-camera camera-icon" style="{{connectFlyCameraStyle}}"></view>
+        </view>
+        <view class="app-head dashboard-head">
+            <view catchtap="cycleTheme" class="theme-icon-button {{themeButtonStopped?'theme-icon-button-stopped':''}}"></view>
+            <view class="head-device {{connectionStatus==='重连中：'?'head-status-reconnecting':''}}">{{connectionStatus}}</view>
+            <view class="head-title">{{cachedDashboardUpdating&&connected?'更新中':deviceName||'蓝牙未连接'}}</view>
+            <view catchtap="openDeviceList" class="head-action head-action-search search-icon"></view>
+            <view catchtap="scanCode" class="head-action head-action-camera camera-icon"></view>
+        </view>
+        <view catchtap="dismissThemeGuide" class="theme-guide" wx:if="{{showThemeGuide}}">
+            <view class="theme-guide-pointer"></view>
+            <view catchtap="noopTouch" class="theme-guide-panel">
+                <view class="theme-guide-title">界面颜色</view>
+                <view class="theme-guide-text">点击左上角调色板，可以切换界面颜色。</view>
+                <view catchtap="dismissThemeGuide" class="theme-guide-button">知道了</view>
+            </view>
+        </view>
+        <view catchtap="closeThemePalette" class="theme-palette-mask" wx:if="{{showThemePalette}}"></view>
+        <view catchtouchcancel="commitThemePalette" catchtouchend="commitThemePalette" catchtouchmove="touchThemePalette" catchtouchstart="touchThemePalette" class="theme-palette" wx:if="{{showThemePalette}}">
+            <view catchtap="selectTheme" class="theme-swatch {{themeColor==item.color?'theme-swatch-active':''}}" data-color="{{item.color}}" style="background:{{item.color}};" wx:for="{{themeOptions}}" wx:key="index"></view>
+        </view>
+        <view class="head-actions-row">
+            <view catchtap="openDeviceList" class="head-action">设备列表</view>
+            <view catchtap="scanCode" class="head-action">扫码连接</view>
+        </view>
+        <view class="disconnect-state" wx:if="{{!connected}}">
+            <view class="connect-prompt-actions">
+                <view catchtap="openDeviceList" class="connect-prompt-item">
+                    <view class="connect-prompt-action search-icon"></view>
+                    <view class="connect-prompt-label">手动连接</view>
+                </view>
+                <view catchtap="scanCode" class="connect-prompt-item">
+                    <view class="connect-prompt-action camera-icon"></view>
+                    <view class="connect-prompt-label">扫码连接</view>
+                </view>
+            </view>
+            <view class="disconnect-title">蓝牙未连接</view>
+            <view class="disconnect-sub">请先搜索并连接 BMS 设备</view>
+        </view>
+        <view class="connected-dashboard" wx:else>
+            <view class="card-wrapper realtime-card">
+                <view class="card-header">
+                    <view class="card-title">实时信息：</view>
+                    <view class="card-time">{{rtc}}</view>
+                </view>
+                <view class="metric-grid">
+                    <view class="metric-box">
+                        <view class="metric-label">总电压</view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{voltage}}</text>
+                            <text class="metric-unit">V</text>
+                        </view>
+                    </view>
+                    <view class="metric-box">
+                        <view class="metric-label">功率</view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{totalPower}}</text>
+                            <text class="metric-unit">W</text>
+                        </view>
+                    </view>
+                    <view class="metric-box">
+                        <view class="metric-label">总电流</view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{current}}</text>
+                            <text class="metric-unit">A</text>
+                        </view>
+                    </view>
+                    <view class="metric-box metric-r2c1">
+                        <view class="metric-label">最高 No.<text class="metric-no-accent">{{maxCellNo}}</text>
+                        </view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{maxVoltage}}</text>
+                            <text class="metric-unit">V</text>
+                        </view>
+                    </view>
+                    <view class="metric-box metric-r2c2">
+                        <view class="metric-label">最低 No.<text class="metric-no-accent">{{minCellNo}}</text>
+                        </view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{minVoltage}}</text>
+                            <text class="metric-unit">V</text>
+                        </view>
+                    </view>
+                    <view class="metric-box metric-avg-voltage">
+                        <view class="metric-label">压差</view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{deltaVoltage}}</text>
+                            <text class="metric-unit">V</text>
+                        </view>
+                    </view>
+                    <view class="metric-box metric-delta-voltage">
+                        <view class="metric-label">电池串数</view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{cellCount}}</text>
+                            <text class="metric-unit" wx:if="{{cellCount!=='--'}}">串</text>
+                        </view>
+                    </view>
+                    <view catchtouchcancel="cancelBluetoothNameHold" catchtouchend="cancelBluetoothNameHold" catchtouchmove="noopTouch" catchtouchstart="startBluetoothNameHold" class="soc-summary-card {{socBatteryClass}}">
+                        <view class="soc-summary-main">
+                            <view class="soc-battery large {{socBlinkClass}}">
+                                <view class="soc-battery-body">
+                                    <view class="soc-battery-fill" style="width:{{socPercent}}%;"></view>
+                                    <view class="soc-battery-text">{{soc}}%</view>
+                                    <view class="soc-battery-text-mask" style="width:{{socPercent}}%;">
+                                        <view class="soc-battery-text soc-battery-text-fill" style="width:{{socTextWidth}}%;">{{soc}}%</view>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                    <view class="metric-box pack-triple-item pack-triple-type">
+                        <view class="metric-label">电池类型</view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{cellType}}</text>
+                        </view>
+                    </view>
+                    <view class="metric-box pack-triple-item pack-triple-design">
+                        <view class="metric-label">总容量</view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{designAh}}</text>
+                            <text class="metric-unit">AH</text>
+                        </view>
+                    </view>
+                    <view class="metric-box pack-triple-item pack-triple-remain">
+                        <view class="metric-label">剩余容量</view>
+                        <view class="metric-value-line">
+                            <text class="metric-value">{{remainAh}}</text>
+                            <text class="metric-unit">AH</text>
+                        </view>
+                    </view>
+                </view>
+                <view class="mos-status-grid">
+                    <view class="mos-status-item mos-charge-status {{chargeMosClass}}">
+                        <view class="mos-status-label">充电回路</view>
+                        <view class="mos-status-value">
+                            <text class="mos-status-dot"></text>{{chargeMos}}</view>
+                    </view>
+                    <view class="mos-status-item mos-discharge-status {{dischargeMosClass}}">
+                        <view class="mos-status-label">放电回路</view>
+                        <view class="mos-status-value">
+                            <text class="mos-status-dot"></text>{{dischargeMos}}</view>
+                    </view>
+                    <view class="mos-status-item {{balanceStatusClass}}">
+                        <view class="mos-status-label">均衡状态</view>
+                        <view class="mos-status-value">
+                            <text class="mos-status-dot"></text>{{balanceStatus}}</view>
+                    </view>
+                    <view class="mos-status-item {{runStatusClass}}">
+                        <view class="mos-status-label">运行状态</view>
+                        <view class="mos-status-value">
+                            <text class="mos-status-dot"></text>{{runStatus}}</view>
+                    </view>
+                </view>
+            </view>
+            <view class="card-wrapper state-card">
+                <view class="card-header">
+                    <view class="card-title">状态信息：</view>
+                </view>
+                <view class="state-head">
+                    <view class="state-title">电池状态</view>
+                    <view class="state-line"></view>
+                    <view class="state-value">{{batteryStateText}}</view>
+                </view>
+                <view class="state-columns">
+                    <view class="state-column">
+                        <view class="state-column-title">保护状态：</view>
+                        <view class="state-tags state-tags-protect">
+                            <text class="state-tag protect-tag" wx:for="{{afeStatusItems}}" wx:key="*this">{{item}}</text>
+                        </view>
+                    </view>
+                    <view class="state-column">
+                        <view class="state-column-title">告警状态：</view>
+                        <view class="state-tags">
+                            <text class="state-tag" wx:for="{{alarmStatusItems}}" wx:key="*this">{{item}}</text>
+                        </view>
+                    </view>
+                    <view class="state-column">
+                        <view class="state-column-title">其他状态：</view>
+                        <view class="state-tags">
+                            <text class="state-tag {{item.danger?'state-tag-danger':''}}" wx:for="{{packStatusItems}}" wx:key="text">{{item.text}}</text>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view class="card-wrapper" wx:if="{{showBluetoothNamePanel}}">
+                <view class="card-header">
+                    <view class="card-title">修改蓝牙名称：</view>
+                    <view class="card-time">0x024A / 18字节</view>
+                </view>
+                <view class="bluetooth-name-form">
+                    <input bindinput="onBluetoothNameInput" class="bluetooth-name-input" maxlength="18" placeholder="输入或扫码填写蓝牙名称" value="{{bluetoothNameInput}}"></input>
+                    <view bindtap="scanBluetoothName" class="bluetooth-name-scan">扫码</view>
+                    <view bindtap="writeBluetoothName" class="bluetooth-name-write">写入</view>
+                </view>
+                <view class="bluetooth-name-status" wx:if="{{bluetoothNameStatus}}">{{bluetoothNameStatus}}</view>
+            </view>
+            <view class="card-wrapper temp-card">
+                <view class="card-header">
+                    <view class="card-title">温度信息：</view>
+                </view>
+                <view class="temp-grid">
+                    <view class="temp-item">
+                        <view class="temp-label">MOS</view>
+                        <view class="temp-value-line">
+                            <text class="temp-value {{mosTemp>50?'temp-hot':''}}">{{mosTemp}}</text>
+                            <text class="temp-unit">℃</text>
+                        </view>
+                    </view>
+                    <view class="temp-item">
+                        <view class="temp-label">T1</view>
+                        <view class="temp-value-line">
+                            <text class="temp-value {{temp1>50?'temp-hot':''}}">{{temp1}}</text>
+                            <text class="temp-unit">℃</text>
+                        </view>
+                    </view>
+                    <view class="temp-item">
+                        <view class="temp-label">T2</view>
+                        <view class="temp-value-line">
+                            <text class="temp-value {{temp2>50?'temp-hot':''}}">{{temp2}}</text>
+                            <text class="temp-unit">℃</text>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view class="temp-strip temp-strip-legacy">
+                <view class="temp-unit">单位:℃</view>
+                <view class="temp-arrow">›</view>
+                <view class="temp-values">MOS:{{mosTemp}} T1:{{temp1}} T2:{{temp2}}</view>
+            </view>
+            <view class="cells-card">
+                <view class="card-header">
+                    <view class="card-title">单体信息：</view>
+                </view>
+                <view class="cell-list {{cellGridClass}}">
+                    <view class="cell-row" wx:for="{{cells}}" wx:key="index">
+                        <view class="cell-battery-icon {{item.levelClass}}">
+                            <view class="cell-battery-bolt">⚡</view>
+                        </view>
+                        <view class="cell-reading {{item.levelClass}}">
+                            <view class="cell-voltage-line">
+                                <text class="cell-voltage">{{item.voltage}}</text>
+                                <text class="cell-unit">V</text>
+                            </view>
+                            <view class="cell-name">NO.{{item.index}}<text class="cell-rank {{item.levelClass}}" wx:if="{{item.rankText}}">{{item.rankText}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <view bindtap="closeDeviceList" catchtouchmove="noopTouch" class="sheet-mask" wx:if="{{showDevices}}"></view>
+        <view catchtouchmove="noopTouch" class="device-sheet" wx:if="{{showDevices}}">
+            <view bindtap="closeDeviceList" class="sheet-close">×</view>
+            <view class="sheet-filter">
+                <text class="sheet-filter-label">过滤</text>
+                <switch bindchange="toggleBmsOnly" checked="{{bmsOnly}}" class="sheet-filter-switch" color="{{themeColor}}"></switch>
+            </view>
+            <view class="sheet-title">设备列表</view>
+            <view class="sheet-subtitle">Device List</view>
+            <view class="search-status">{{scanning?'搜索设备中':'搜索完成'}}({{filteredDevices.length}})</view>
+            <scroll-view class="sheet-device-list" enhanced="true" scrollY="true" showScrollbar="true">
+                <view bindtap="connectDevice" class="sheet-device" data-device="{{item}}" wx:for="{{filteredDevices}}" wx:key="deviceId">
+                    <view class="bt-icon ble-list-icon"></view>
+                    <view class="sheet-device-main">
+                        <view class="sheet-name">{{item.name}}</view>
+                    </view>
+                    <view class="sheet-rssi">{{item.dbm}}</view>
+                </view>
+            </scroll-view>
+        </view>
+    </view>
+</view>
